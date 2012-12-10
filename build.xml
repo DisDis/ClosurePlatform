@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="ClosurePlatform" basedir="." default="soy_update">
+
+    <property file="../build.properties"/>
+    <property file="build.properties"/>
+
+    <import file="./build.soy.xml"/>
+	
+    <target name="refresh-eclipse" if="soy.refresh.project">
+           <eclipse.refreshLocal resource="CP/" depth="infinite"/>
+    	   <echo message="Project refresh"/>
+    </target>
+
+    
+    <target name="check.modules" depends="soy.compile-RELEASE,soy.create.modules"/>
+	<target name="soy_update" depends="soy.compile,soy.create.dependency">
+	</target>
+</project>

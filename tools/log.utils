@@ -1,0 +1,30 @@
+outputH1(){
+	echo "------== $1 ==------"
+}
+outputH2(){ 
+	echo "   -------- $1 --------"
+}
+outputLine(){
+	echo "   --------------------"
+}
+outputSub(){
+	echo "   $1"
+}
+processStart(){
+	echo -n "   $1"
+}
+processLive(){
+	echo -n .
+}
+processEnd(){
+	echo "$1"
+}
+processCheck(){
+	if [ $1 -ne 0 ]; 
+	then
+		processEnd "ERROR"
+		exit 1;
+	else
+		processEnd "OK"
+	fi
+}

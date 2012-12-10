@@ -1,0 +1,39 @@
+{namespace common.ui.urls}
+
+/**   
+Ссылка на картинку пользователя
+@param userId Идентификатор пользователя
+@param imageId Идентификатор картинки
+**/
+{template .profileAvatar}
+{call .imageBase/}/{$userId|id}/{$imageId|id}.png
+{/template}
+
+/**
+Заглушка для аватарки пользователя
+**/
+{template .profileAvatarStub}
+{Handlers.rootPath}/themes/{THEME}/empty.png
+{/template}
+
+
+/**
+Базовый урл для картинок
+**/
+{template .imageBase}
+{IMAGE_BASE}
+{/template}
+
+/**
+Ссылка на страницу 1
+**/
+{template .page1}
+{Handlers.rootPath}/index.html
+{/template}
+
+/**
+Ссылка на страницу 2
+**/
+{template .page2}
+{Handlers.rootPath}/other.html
+{/template}

@@ -1,0 +1,10 @@
+{namespace common.ui.buttons}
+
+/**
+Стандартная кнопка
+@param title
+@param? cssClass
+**/
+{template .stdInput}
+<button class="{css button}{sp}{if $cssClass}{$cssClass|id}{/if}{sp}{css other-class}">{$title}</button>
+{/template}

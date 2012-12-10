@@ -1,0 +1,203 @@
+{namespace example.ui.test1}
+
+// Anotation from Eclipse soy plagin
+// @function substring 2 1
+// @function dateTimeFormat 2
+
+/**
+ * No parameters
+ */
+{template .simple1 private="true"}
+<div class="{css style1} {css style2}">{msg desc="Test simple1 template text"}Simple template{/msg}</div>
+{/template}
+
+/**
+ * Withs parameters
+ * @param p1 Parameter 1
+ * @param p2 Parameter 2
+ */
+{template .simple2}
+<div class="{css style1} {css style2}">{msg desc="Test simple2 template text"}Simple template, param1 = {$p1|id}, param2={$p2}{/msg}</div>
+{/template}
+
+/**
+ * Withs parameters
+ * @param p1 Parameter 1
+  * @param? p3 Not requered param
+ */
+{template .simple3}
+<div class="{css style1} {css style2}">
+{if $p3}
+	{msg desc="Test simple3 template text with p3"}Simple template, param1 = {$p1|id}, param3 = {$p3}{/msg}
+{else}
+	{msg desc="Test simple3 template text"}Simple template, param1 = {$p1|id}{/msg}
+{/if}
+</div>
+{/template}
+
+
+/**
+ * Withs parameters
+ * @param complex1 Parameter 1
+ */
+{template .simple4}
+<div class="{css style1}">
+	{msg desc="Test simple4 template text"}Simple template, complex1.p1={$complex1.p1|id},p2.a={$complex1.p2.a|id},p2.b={$complex1.p2.b|id}{/msg}
+</div>
+{/template}
+
+/**
+ * 
+ */
+{template .callTest1}
+{call .simple1/}
+{call .simple2 data="['p1':123,'p2':456]"/}
+{call .simple2}
+	{param p1}123{/param}
+	{param p2:456/}
+{/call}
+{call .simple3}
+{param p1}123{/param}
+{/call}
+{let $p2:['a':'paramA','b':2]/}
+{let $com1:['p1':0,'p2':$p2]/}
+{call .simple4}
+{param complex1:$com1/}
+{/call}
+{/template}
+
+/**
+ * @param p1
+ */
+{template .callTest2}
+{call .simple2 data="all"}
+{param p2}456{/param}
+{/call}
+{call .simple3}
+{param p1:$p1/}
+{/call}
+{call .simple3 data="all"}
+{param p3:567/}
+{/call}
+{/template}
+
+
+/**
+ *@param items 
+ */
+{template .foreachTest}
+{foreach $item in $items}
+{if isFirst($item)}
+<div>FIRST</div>
+{/if}
+{if isLast($item)}
+<div>LAST</div>
+{/if}
+{index($item)}-{$item}
+{ifempty}
+{msg desc="No items, foreach test"}No items{/msg}
+{/foreach}
+{/template}
+
+/**
+ @param numLines
+ */
+{template .forTest}
+{for $i in range($numLines)}
+Line {$i + 1} of {$numLines}.<br>
+{/for}
+{/template}
+
+
+/**
+Время вида Дата: DD MMM YYYY
+@param? cssClass
+@param date
+**/
+{template .dateShort}
+{if $date}
+<span class="{css nowrap}{sp}{if $cssClass}{$cssClass|id}{/if}">
+    {let $dFormat}{msg desc="time"}DD MMM YYYY{/msg}{/let}
+    {dateTimeFormat($date,$dFormat)|id}
+</span>
+{else}-{/if}
+{/template}
+
+/**
+ * @param paramInt
+ */
+{template .letTest}
+{let $localValue:$paramInt+10/}
+{let $localString}{$paramInt}_10{/let}
+<div>{$localValue},{$localString}</div>
+{/template}
+
+/**
+ * @param p1
+ */
+{template .ifTest1}
+Param p1={$p1}
+{if $p1>10}
+$p1 > 10
+{elseif $p1>5}
+10 > $p1 > 5
+{else}
+$p1 <= 5
+{/if}
+{/template}
+/**
+ * @param p1 is example.TestType in test.enum.js
+ * @param p2 is integer
+ */
+{template .switchTest1}
+{switch $p1}
+{case example.TestType.OPEN}
+OPEN
+{case example.TestType.CLOSED}
+CLOSED
+	{switch $p2}
+	{case 0}0
+	{case 1}1
+	{default}{$p2}
+	{/switch}
+{case example.TestType.SUSPENDED}
+SUSPENDED
+{default}
+-Unknown value:{$p1}-
+{/switch}
+{/template}
+* 
+*/
+/**
+ * @param items
+ * @param currentDateTime
+ */
+{template .testPage}
+<div>
+	<h1>{msg desc="Call header"}Call{/msg}</h1><br>
+	<h2>{msg desc="Simple header"}Simple{/msg}</h2><br>
+	{call .simple1/}<br>
+	{call example.ui.test1.simple1/}<br>
+	{call example.ui.test2.simple1Test2/}<br>
+	<h2>{msg desc="Combo header"}Combo{/msg}</h2><br>
+	{call .callTest1/}<br>
+	{call .callTest2}{param p1:999/}{/call}<br>
+	<h1>{msg desc="Global constants"}Global constants, defined in global.properties{/msg}</h2><br>
+	{msg desc="Current theme text"}Current theme THEME={THEME}{/msg}<br>
+	<h1>{msg desc="Global values"}Global values, defined in js code and externs{/msg}</h2><br>
+	{msg desc="Global values test"}Global values Handlers.rootPath='{Handlers.rootPath}'{/msg}<br>
+	<h1>{msg desc="For header"}For{/msg}</h1><br>
+	{call .foreachTest}{param items:[]/}{/call}<br>
+	{call .foreachTest}{param items:$items/}{/call}<br>
+	{call .forTest}{param numLines:randomInt(4)/}{/call}<br>
+	<h1>{msg desc="Let header"}Let{/msg}</h1><br>
+	{call .dateShort}{param date:$currentDateTime/}{/call}<br>
+	{call .letTest}{param paramInt:99/}{/call}<br>
+	<h1>{msg desc="If,switch header"}if,switch{/msg}</h1><br>
+	{call .ifTest1}{param p1:2/}{/call}<br>
+	{call .ifTest1}{param p1:7/}{/call}<br>
+	{call .switchTest1}{param p1:example.TestType.OPEN/}{param p2:1/}{/call}<br>
+	{call .switchTest1}{param p1:example.TestType.CLOSED/}{param p2:1/}{/call}<br>
+	{call .switchTest1}{param p1:4/}{param p2:1/}{/call}<br>
+</div>
+{/template}

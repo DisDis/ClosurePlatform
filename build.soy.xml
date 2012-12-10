@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="soy" basedir=".">
+
+	<property file="../build.soy.properties"/>
+    <property file="build.soy.properties"/>
+
+ 	<property name="soy.tools.dir" value="./tools"/>
+ 	<property name="soy.theme.dir" value="./themes"/>
+
+ 	<target name="soy.clean" description="remove .timestamp files">
+ 		<exec dir="${soy.tools.dir}/" executable="./clean.sh" failonerror="false"></exec>
+    </target>
+    
+    <target name="soy.compile" description="compile soy and gss">
+        <exec dir="${soy.tools.dir}/" executable="./compile.templates.sh" failonerror="yes">
+        </exec>
+    </target>
+
+    <target name="soy.compile-RELEASE" description="compile soy and gss RELEASE mode">
+        <exec dir="${soy.tools.dir}/" executable="./compile.templates.sh">
+            <arg line="RELEASE"/>
+        </exec>
+    </target>
+
+    <target name="soy.create.dependency">
+        <exec dir="${soy.tools.dir}/" executable="./deps.sh">
+        </exec>
+    </target>
+    
+    <target name="soy.create.modules">
+        <exec dir="${soy.tools.dir}" executable="./constantsToMap.sh">
+        </exec>
+        <java classname="gcm.Application" fork="true" dir="${soy.tools.dir}/gcmodule/" failonerror="yes">
+            <classpath>
+                <pathelement location="./${soy.tools.dir}/gcmodule/gcmodule.jar"/>
+                <path location="./${soy.tools.dir}/gcmodule/json-2-RELEASE65.jar"/>
+            </classpath>
+        </java>
+        <exec dir="${soy.tools.dir}" executable="./parsedMap.sh">
+        </exec>
+    </target>
+
+</project>

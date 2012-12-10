@@ -1,0 +1,17 @@
+{namespace states.ui.intro}
+
+/**
+ *
+ */
+{template .main}
+<div>{msg desc="Лобби"}Лобби{/msg}
+<ul class="{css l-list}"></ul>
+{call common.ui.buttons.stdInput}
+	{param title}{msg desc="Создать мир"}Создать{/msg}{/param}
+	{param cssClass}{css l-create}{/param}
+{/call}
+<div class="{css l-create} {css blue-background}">{msg desc="Создать мир"}Создать{/msg}</div>
+<a href="{call common.ui.urls.page1/}">{msg desc="Ссылка на страницу 1"}Page1{/msg}</a>
+</div>
+<div onclick="global_export.alertTest(event,this,'{msg desc="Текст сообщения"}Test text{/msg}')">{msg desc="Название кнопки глобальной функции"}Button export function{/msg}</div>
+{/template}

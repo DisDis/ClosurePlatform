@@ -1,0 +1,6 @@
+.black-background{
+ background: BLACK;
+}
+.blue-background{
+ @mixin gradient(#005B8F, #005B8F, 0%, #009C7D, 50%, #008D6B, 100%);
+}
