@@ -26,11 +26,11 @@ example.states.Intro.prototype = {
     _bind : function() {
         var that = this;
         that._$list = $('.' + goog.getCssName('l-list'), that._$context);
-        $('.' + goog.getCssName('l-create'), that._$context).on('click', function() {
-            that._onCreateWorld();
+        $('.' + goog.getCssName('l-test'), that._$context).on('click', function() {
+            that._onTestState();
         });
     },
-    _onCreateWorld : function() {
+    _onTestState : function() {
         example.global.stateManager.setState('test');
     },
     stop : function() {

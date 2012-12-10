@@ -4,7 +4,12 @@
  *
  */
 {template .main}
-<div>{msg desc="Комната"}Комната{/msg}
+<div>
+<h1>{msg desc="Test State Title"}Test State Title{/msg}</h1>
+{call common.ui.buttons.stdInput}
+	{param title}{msg desc="Кнопка перехода к Intro"}Back to Intro{/msg}{/param}
+	{param cssClass}{css l-back}{/param}
+{/call}
 <div class="{css l-back}">{msg desc="Кнопка перехода к Intro"}Back to Intro{/msg}</div>
 <div class="{css l-test-content}"></div>
 </div>

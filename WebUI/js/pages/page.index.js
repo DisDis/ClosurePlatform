@@ -3,7 +3,6 @@ goog.require('example.page.debug');
 goog.require('example.global.stateManager');
 goog.require('example.states.Intro');
 goog.require('example.states.Test');
-goog.require('goog.history.Html5History');
 
 goog.provide('example.page.index');
 
@@ -17,7 +16,7 @@ window["init"] = function() {
                     new example.states.Test().init({}));
     example.log.info("Start synchronize");
     function syncFase() {
-        example.global.stateManager.history('state','intro');
+        example.global.stateManager.history('intro');
     }
 
     setTimeout(syncFase,1000);

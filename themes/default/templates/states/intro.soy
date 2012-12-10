@@ -4,14 +4,14 @@
  *
  */
 {template .main}
-<div>{msg desc="Лобби"}Лобби{/msg}
+<div>{msg desc="Closure Platform"}Closure Platform{/msg}
 <ul class="{css l-list}"></ul>
 {call common.ui.buttons.stdInput}
-	{param title}{msg desc="Создать мир"}Создать{/msg}{/param}
-	{param cssClass}{css l-create}{/param}
+	{param title}{msg desc="Test state"}Test state{/msg}{/param}
+	{param cssClass}{css l-test}{/param}
 {/call}
-<div class="{css l-create} {css blue-background}">{msg desc="Создать мир"}Создать{/msg}</div>
-<a href="{call common.ui.urls.page1/}">{msg desc="Ссылка на страницу 1"}Page1{/msg}</a>
+<div class="{css l-test} {css blue-background}">{msg desc="Test state"}Test state{/msg}</div>
+<a href="{call common.ui.urls.indexStateTest/}">{msg desc="Link to test state"}Link to Test state{/msg}</a>
 </div>
 <div onclick="global_export.alertTest(event,this,'{msg desc="Текст сообщения"}Test text{/msg}')">{msg desc="Название кнопки глобальной функции"}Button export function{/msg}</div>
 {/template}

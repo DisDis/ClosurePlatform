@@ -1,8 +1,8 @@
 goog.require('goog.debug.Logger');
 goog.require('example.page.debug');
 goog.require('example.global.stateManager');
-goog.require('example.states.Lobby');
-goog.require('example.states.Room');
+goog.require('example.states.Intro');
+goog.require('example.states.Test');
 
 goog.provide('example.page.other');
 
@@ -11,12 +11,12 @@ window["init"] = function() {
     example.global.stateManager.init({
         $buffer1 : $('#'+goog.getCssName('l-fxd-screen1')),
         $buffer2 : $('#'+goog.getCssName('l-fxd-screen2'))
-    }).addState('lobby',
-            new example.states.Lobby().init({})).addState('room',
-                    new example.states.Room().init({}));
+    }).addState('intro',
+            new example.states.Intro().init({})).addState('test',
+                    new example.states.Test().init({}));
     example.log.info("Start synchronize");
     function syncFase() {
-        example.global.stateManager.setState('lobby');
+        example.global.stateManager.history('intro');
     }
 
     setTimeout(syncFase,1000);
