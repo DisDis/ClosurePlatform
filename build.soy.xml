@@ -33,7 +33,7 @@
         <java classname="gcm.Application" fork="true" dir="${soy.tools.dir}/gcmodule/" failonerror="yes">
             <classpath>
                 <pathelement location="./${soy.tools.dir}/gcmodule/gcmodule.jar"/>
-                <path location="./${soy.tools.dir}/gcmodule/json-2-RELEASE65.jar"/>
+                <path location="./${soy.tools.dir}/libs/json-2-RELEASE65.jar"/>
             </classpath>
         </java>
         <exec dir="${soy.tools.dir}" executable="./parsedMap.sh">

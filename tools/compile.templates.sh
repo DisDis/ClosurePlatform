@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #	 This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation, either version 3 of the License, or
@@ -13,7 +13,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 #	 Authors: Igor Demyanov<igor.demyanov@gmail.com>
-SCR_VERSION="v1.15 03:28 10.12.2012"
+SCR_VERSION="v1.18 15:45 10.04.2013"
 # <script.sh> <DEBUG|RELEASE>
 if [ "$1" = "RELEASE" ]; then
 	echo "Release mode"
@@ -40,13 +40,12 @@ TOOL_JS_PARAM=" \
 	"
 	
 TOOL_JS=com.google.template.soy.SoyToJsSrcCompiler
-#$DIR/cl-templates/js/SoyToJsSrcCompiler.jar
 # ----= CSS =----
-TOOL_CSS=$DIR/cl-stylesheets/closure-stylesheets.jar
+TOOL_CSS=$TOOL_LIBS_PATH/$JAR_CLOSURE_STYLESHEETS
 
 # ----= JAVA =----
 TOOL_JAVA_PARAM=""
-TOOL_JAVA=$DIR/cl-templates/java/SoyParseInfoGenerator.jar
+TOOL_JAVA=$TOOL_LIBS_PATH/$JAR_SOY_PARSER_INFO_GENERATOR
 
 writeTimeStamp()
 {
@@ -85,18 +84,21 @@ cleanWorkFolder()
 {
 	if [ $IS_DEBUG -eq 0 ]; then
 		outputH1 "Clean generate folder"
-		processStart "Cleaning JS..."
-		rm -R $OUTPUT_JS_PATH
-		processCheck $?
+		if [ -d "$OUTPUT_JS_PATH" ]; then
+			processStart "Cleaning JS..."
+			rm -R $OUTPUT_JS_PATH
+			processCheck $?
+		fi
 
 		#outputH2 "Clean Java"
 		#rm -R $OUTPUT_JAVA_PATH/*.java
 		#processCheck $?
-		processStart "Cleaning CSS..."
-		rm -R $OUTPUT_CSS_PATH/*.css
-		processCheck $?
-#	else
-#		outputSub "Skip in DEBUG"
+
+		if [ -d "$OUTPUT_CSS_PATH" ]; then
+			processStart "Cleaning CSS..."
+			rm -R $OUTPUT_CSS_PATH
+			processCheck $?
+		fi
 	fi
 }
 
@@ -144,16 +146,17 @@ createGSSFileList()
 	outputH1 "Scan GSS files"
 
 	FIND_PARAM=""
-	if [ $IS_DEBUG -eq 1 ]; then
+	#if [ $IS_DEBUG -eq 1 ]; then
 		#Debug
 		if [ -f $GSS_PATH/$TIMESTAMP_FNAME ]; then
 			FIND_PARAM=" -cnewer $GSS_PATH/$TIMESTAMP_FNAME "
 		fi
-		FILE_LIST=$(find $GSS_PATH/ $FIND_PARAM -name *.gss)
-	else
+		#-maxdepth 1
+		FILE_LIST=$(find $GSS_PATH/ $FIND_PARAM  -name "*.gss" -type f )
+	#else
 		#Release
-		FILE_LIST=$(ls -v $GSS_PATH/*.gss)
-	fi
+	#	FILE_LIST=$(ls -v $GSS_PATH/*.gss)
+	#fi
 
 	for FILE_NAME in $FILE_LIST;
 	do
@@ -171,7 +174,7 @@ compileJS()
 		return 0
 	fi
 	processStart "Compiling SOY..."
-	java 	-cp ./cl-templates/js/SoyToJsSrcCompiler.jar:./cl-templates/plugins/cl-t-plugin.jar \
+	java 	-cp $TOOL_LIBS_PATH/$JAR_SOY_TO_JS_COMPILER:./cl-templates/plugins/cl-t-plugin.jar \
 		$TOOL_JS $TOOL_JS_PARAM \
 		--inputPrefix $TEMPLATE_PATH \
 		--compileTimeGlobalsFile $TEMPLATE_PATH/global.properties \
@@ -187,13 +190,17 @@ compileDebugCSS()
 	for FILE_NAME in $GSS_LIST ; do
 		ONLY_NAME=$( basename $FILE_NAME)
 		if [ "$ONLY_NAME" = "$DEFINITION_GSS" ];then
-			#echo "Skip '$DEFINITION_GSS'"
 			processLive
 			continue
 		fi
-		ONLY_NAME="$OUTPUT_CSS_PATH/${ONLY_NAME%.*}.css"
+		OUTPUT_CSS_FILE="${FILE_NAME/$GSS_PATH}"
+		OUTPUT_CSS_FILE="$OUTPUT_CSS_PATH/${OUTPUT_CSS_FILE%.*}.css"
+		OUTPUT_CSS_FOLDER=`dirname "$OUTPUT_CSS_FILE"`
+		if [ ! -d "$OUTPUT_CSS_FOLDER" ]; then
+			mkdir $OUTPUT_CSS_FOLDER
+		fi
 		java -jar $TOOL_CSS $TOOL_CSS_PARAM \
-	   		--output-file $ONLY_NAME \
+	   		--output-file $OUTPUT_CSS_FILE \
 	   	$FILE_NAME $GSS_PATH/$DEFINITION_GSS &
 		PIDS="$PIDS $!"
 	done
@@ -208,37 +215,111 @@ compileDebugCSS()
 	processEnd "OK"
 }
 
+compileReleaseGSSFolder()
+{
+	local CURRENT_PATH=$1
+	local CURRENT_CSS_FILE=$2
+	local PARAMS=$3
+	local GSS_LIST=""
+	local FILE_LIST=$(ls -v $CURRENT_PATH/*.gss)
+	for FILE_NAME in $FILE_LIST;
+	do
+		local ONLY_NAME=$( basename $FILE_NAME )
+		if [ "$ONLY_NAME" = "$DEFINITION_GSS" ];then
+			#echo "Skip '$DEFINITION_GSS'"
+			continue
+		fi
+			GSS_LIST="$GSS_LIST $FILE_NAME"
+			outputSub "found '$FILE_NAME'"
+	done
+
+
+java -jar $TOOL_CSS $TOOL_CSS_PARAM \
+ --output-file $OUTPUT_CSS_PATH/$CURRENT_CSS_FILE.css \
+ $PARAMS \
+ $GSS_LIST
+#cp $OUTPUT_CSS_PATH/$CURRENT_CSS_FILE.css $OUTPUT_CSS_PATH/$CURRENT_CSS_FILE.css.old
+sed -i 's/[^{]*{test_test:1}/ /' $OUTPUT_CSS_PATH/$CURRENT_CSS_FILE.css
+
+	if [ $? -ne 0 ]; 
+	then
+		exit 1;
+	fi
+	outputSub "generated $OUTPUT_CSS_PATH/$CURRENT_CSS_FILE.css"
+}
+
+createFakeCss()
+{
+	FAKE_CSS=$OUTPUT_CSS_PATH/fake.css
+	if [ -f $FAKE_CSS ]
+	then
+		rm $FAKE_CSS
+	fi
+	local FILE_LIST=$( find $GSS_PATH/ $FIND_PARAM -name *.gss )
+	java -jar $TOOL_CSS $TOOL_CSS_PARAM \
+ --rename NONE \
+ --output-renaming-map $OUTPUT_CSS_PATH/renaming_map.properties \
+ --output-renaming-map-format PROPERTIES \
+ $FILE_LIST > $FAKE_CSS
+	outputSub "Created fake.css"
+
+	echo "/* Fake */">$FAKE_CSS
+	for CSS_NAME in $( grep -Eo ^[^=]+ $OUTPUT_CSS_PATH/renaming_map.properties )
+	do
+		echo " .$CSS_NAME">>$FAKE_CSS
+	done
+	echo "{ /* Stub */ test_test:1; }">>$FAKE_CSS
+
+	#rm $OUTPUT_CSS_PATH/renaming_map.properties
+}
+
+compileReleaseCSS()
+{
+	outputSub "Compiling GSS..."
+
+	if [ -f $OUTPUT_CSS_PATH/renaming_map.properties ]
+	then
+		rm $OUTPUT_CSS_PATH/renaming_map.properties
+	fi
+	if [ -f $OUTPUT_JS_PATH/renaming_map_compiled.js ]
+	then
+		rm $OUTPUT_JS_PATH/renaming_map_compiled.js
+	fi
+
+	createFakeCss
+	
+
+	#local OUTPUT_RENAME_MAP=" --output-renaming-map-format PROPERTIES --output-renaming-map $OUTPUT_CSS_PATH/renaming_map.properties"
+
+	compileReleaseGSSFolder "$GSS_PATH" "theme" " --allowed-unrecognized-property test_test --output-renaming-map-format CLOSURE_COMPILED --output-renaming-map $OUTPUT_JS_PATH/renaming_map_compiled.js $FAKE_CSS $GSS_PATH/$DEFINITION_GSS"
+	for GSS_FOLDER in $( find $GSS_PATH/ -maxdepth 1 -type d )
+	do
+		GSS_FOLDER=${GSS_FOLDER/$GSS_PATH}
+		if [ "$GSS_FOLDER" = "/" ];then
+			continue
+		fi
+
+		if [ ! -d "$OUTPUT_CSS_PATH$GSS_FOLDER" ]; then
+			mkdir $OUTPUT_CSS_PATH$GSS_FOLDER
+		fi
+
+		compileReleaseGSSFolder "$GSS_PATH$GSS_FOLDER" "$GSS_FOLDER$GSS_FOLDER" " --allowed-unrecognized-property test_test $FAKE_CSS $GSS_PATH/$DEFINITION_GSS"
+	done
+	rm $FAKE_CSS
+}
+
 compileCSS()
 {
-	createGSSFileList
 	outputH1 "GSS"
+if [ $IS_DEBUG -eq 0 ]; then
+	compileReleaseCSS
+else
+	createGSSFileList
 	if [ "$GSS_LIST" = "" ];then
 		outputSub "No changed files"
 		return 0
 	fi
 	processStart "Compiling GSS..."
-if [ $IS_DEBUG -eq 0 ]; then
-	java -jar $TOOL_CSS $TOOL_CSS_PARAM \
-	   --output-file $OUTPUT_CSS_PATH/compact.css \
-	   $GSS_LIST
-
-	if [ $? -ne 0 ]; 
-	then
-		processEnd "ERROR"
-		exit 1;
-	else
-		processLive
-	fi
-
-	java -jar $TOOL_CSS $TOOL_CSS_PARAM \
-	   --output-renaming-map-format PROPERTIES \
-	   --output-renaming-map $OUTPUT_CSS_PATH/renaming_map.properties \
-	    $GSS_LIST > /dev/null
-
-	processCheck $?
-
-	outputSub "generated $OUTPUT_CSS_PATH/compact.css"
-else
 	compileDebugCSS
 fi
 }
@@ -296,7 +377,7 @@ do
 	if [ $IS_DEBUG -eq 0 ]; then
 	#RELASE
 	TOOL_CSS_PARAM=" \
-	--rename CLOSURE --define RELEASE --output-renaming-map $OUTPUT_JS_PATH/renaming_map_compiled.js --output-renaming-map-format CLOSURE_COMPILED \
+     --rename CLOSURE --define RELEASE \
 	 $TOOL_CSS_PARAM_COMMON "
 	else
 	#DEBUG

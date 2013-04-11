@@ -20,7 +20,7 @@ DIR=`dirname $0`
 . $DIR/log.utils
 command -v gawk >/dev/null 2>&1 || { echo >&2 "Require gawk but it's not installed.  Aborting."; exit 1; }
 echo "Parsing '$JAVA_CONSTANTS_FILE'"
-gawk 'match($0,/public +static +final +String +([^ ]+) += +\"([^ ]+)\" *;/,arr) { print arr[1]":"arr[2] }' $JAVA_CONSTANTS_FILE >$CONSTANTS_MAP
+gawk 'match($0,/ +String +([^ ]+) += +\"([^ ]+)\" *;/,arr) { print arr[1]":"arr[2] }' $JAVA_CONSTANTS_FILE >$CONSTANTS_MAP
 RESULT=0
 for PARAM in $( cat $CONSTANTS_MAP )
 		do

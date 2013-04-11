@@ -6,7 +6,7 @@ DIR_WORK=$DIR/../WebUI/js/
 THEME=default
 LOCALE=ru
 
-./closure/bin/calcdeps.py \
+./closure/calcdeps.py \
   -p $DIR_WORK/closure/ \
   -p $DIR_WORK/common/ \
   -p $DIR_WORK/example/ \

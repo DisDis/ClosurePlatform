@@ -21,6 +21,7 @@ DIR=`dirname $DIR_REAL`
 cd $DIR 
 echo "Path: $DIR"
 LOCALES=$(echo $THEME_LOCALES|sed 's/,/ /g')
+XLF_JAR="Saxon-HE-9.4.0.7.jar"
 
 
 createSOYFileList()
@@ -52,7 +53,7 @@ createXLF()
 			fi
 		fi
 		processStart "Generating '$LOCALE.xlf'..."
-		java -jar $TOOL_LOCALE_PATH/SoyMsgExtractor.jar \
+		java -jar $TOOL_LIBS_PATH/$JAR_SOY_MSG_EXTRACTOR \
 		 --sourceLocaleString $LOCALE_SOURCE \
 		 --targetLocaleString $LOCALE \
 		 --outputPathFormat "$OUTPUT_FILE" \
@@ -91,14 +92,14 @@ for LOCALE in $LOCALES ; do
 		if [ -f $LOST_FILE ]; then
 			PARAM="$PARAM lost_file=$LOST_FILE "
 		fi
-		java -cp $TOOL_MERGE_PATH/saxon9he.jar net.sf.saxon.Transform -t $PARAM 
+		java -cp $TOOL_LIBS_PATH/$XLF_JAR net.sf.saxon.Transform -t $PARAM 
 	fi
 	#находит пртерянные переводы
 	PARAM=" -s:$NEW_FILE -xsl:$TOOL_MERGE_PATH/lost.xslt -o:$LOST_FILE old_file=$OLD_FILE "
 	if [ -f $LOST_FILE ]; then
 			PARAM="$PARAM lost_file=$LOST_FILE "
 	fi
-	java -cp $TOOL_MERGE_PATH/saxon9he.jar net.sf.saxon.Transform -t $PARAM
+	java -cp $TOOL_MERGE_PATH/$XLF_JAR net.sf.saxon.Transform -t $PARAM
 done
 }
 
