@@ -1,5 +1,6 @@
 ClosurePlatform
 ===============
+Short documentation(russian only): http://habrahabr.ru/post/162261/
 
 Quick start
 
